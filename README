@@ -6,25 +6,27 @@ This requires the Dangerous Prototype USB IR Toy
 (http://dangerousprototypes.com/docs/USB_Infrared_Toy) with firmware revision 22
 or higher.
 
-This module has been tested with Python 2.7 and 3.2.
+This module has been tested with Python 2.7 and 3.2 on Ubuntu 12.04.  There is 
+no OS specific code in this module, so it should work on Mac OS and Windows but
+has not been tested.
 
-This module makes it easy to transmit to and receive from an IR Toy, eg::
+This module makes it easy to transmit to and receive from an IR Toy, eg:
 
-    #!/usr/bin/env python
+```python 
+import serial
+import irtoy
 
-    import serial
-    import irtoy
+with serial.Serial('/dev/ttyACM0') as serialDevice:
 
-    with serial.Serial('/dev/ttyACM0') as serialDevice:
+    # create a new instance of the IrToy class
+    toy = irtoy.IrToy(serialDevice)
+    
+    # receive an IR signal from the IR Toy, stored in a list.
+    # Note: this call will block (hang) until an IR code has been received.
+    irCode = toy.receive()
 
-        # create a new instance of the IrToy class
-        toy = irtoy.IrToy(serialDevice)
-        
-        # receive an IR signal from the IR Toy, stored in a list.
-        # Note: this call will block (hang) until an IR code has been received.
-        irCode = toy.receive()
+    # transmit the recorded signal back to the IR Toy
+    toy.transmit(irCode)
 
-        # transmit the recorded signal back to the IR Toy
-        toy.transmit(irCode)
-
-        toy.close()
+    toy.close()
+```
