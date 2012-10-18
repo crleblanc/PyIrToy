@@ -10,9 +10,11 @@ This module has been tested with Python 2.7 and 3.2 on Ubuntu 12.04.  There is
 no OS specific code in this module, so it should work on Mac OS and Windows but
 has not been tested.
 
-This module makes it easy to transmit to and receive from an IR Toy, eg:
+This module makes it easy to transmit to and receive from an IR Toy.  Here's a 
+quick example.
 
 ```python
+
 import serial
 import irtoy
 
