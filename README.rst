@@ -10,25 +10,5 @@ This module has been tested with Python 2.7 and 3.2 on Ubuntu 12.04.  There is
 no OS specific code in this module, so it should work on Mac OS and Windows but
 has not been tested.
 
-This module makes it easy to transmit to and receive from an IR Toy.  Here's a 
-quick example.
-
-```python
-
-import serial
-import irtoy
-
-with serial.Serial('/dev/ttyACM0') as serialDevice:
-
-    # create a new instance of the IrToy class
-    toy = irtoy.IrToy(serialDevice)
-    
-    # receive an IR signal from the IR Toy, stored in a list.
-    # Note: this call will block (hang) until an IR code has been received.
-    irCode = toy.receive()
-
-    # transmit the recorded signal back to the IR Toy
-    toy.transmit(irCode)
-
-    toy.close()
-```
+This module makes it easy to transmit to and receive from an IR Toy.  The wiki
+has some quick examples.
