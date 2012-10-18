@@ -12,7 +12,7 @@ has not been tested.
 
 This module makes it easy to transmit to and receive from an IR Toy, eg:
 
-```python 
+```python
 import serial
 import irtoy
 
