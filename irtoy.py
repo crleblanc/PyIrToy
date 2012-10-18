@@ -2,7 +2,8 @@
 #
 # Class for simplifying the reading and transmitting of IR signals from the IR Toy.
 # This only works for firmware revision 22 or greater.
-# see http://dangerousprototypes.com/docs/USB_Infrared_Toy for more info.
+# see https://github.com/crleblanc/PyIrToy and
+# http://dangerousprototypes.com/docs/USB_Infrared_Toy for more info.
 #
 # Chris LeBlanc, 2012
 #
@@ -17,7 +18,6 @@
 # with this program. If not, see <http://creativecommons.org/licenses/by-sa/3.0/>.
 
 import time
-import serial
 import binascii
 
 class IrToy(object):
@@ -43,6 +43,7 @@ class IrToy(object):
     def _setSamplingMode(self):
         '''set the IR Toy to sampling mode, pretty much all the time'''
         self.reset()
+
         self.toy.write(b'S')
 
         self._sleep()
@@ -92,7 +93,7 @@ class IrToy(object):
         sample format'''
 
         self._sleep()
-        
+
         # reset and put back in receive mode in case it was in transmit mode or there was junk in the buffer
         self._setSamplingMode()
 
