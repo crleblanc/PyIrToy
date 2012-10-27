@@ -20,6 +20,10 @@
 import time
 import binascii
 
+__author__ = 'Chris LeBlanc'
+__version__ = '0.2.1'
+__email__ = 'crleblanc@gmail.com'
+
 class IrToy(object):
 
     def __init__(self, serialDevice):
@@ -27,7 +31,6 @@ class IrToy(object):
         self.toy = serialDevice
 
         self.sleepTime = 0.05
-        self.closed = False
         self.handshake = None
         self.byteCount = None
         self.complete = None
@@ -41,7 +44,7 @@ class IrToy(object):
         time.sleep(self.sleepTime)
 
     def _setSamplingMode(self):
-        '''set the IR Toy to sampling mode, pretty much all the time'''
+        '''set the IR Toy to use sampling mode, which we use exclusively'''
         self.reset()
 
         self.toy.write(b'S')
@@ -71,8 +74,7 @@ class IrToy(object):
             raise IOError('incorrect number of bytes written to serial device, expected %d' % len(code))
 
     def _getTransmitReport(self):
-        '''get the byteCount and completion status from the IR Toy, so far we are always setting these to be used
-        but could have that as an option'''
+        '''get the byteCount and completion status from the IR Toy'''
 
         hexBytes = binascii.b2a_hex(self.toy.read(3)[1:])
         self.byteCount = int(hexBytes, 16)
@@ -90,7 +92,8 @@ class IrToy(object):
     def receive(self):
         '''Read a signal from the toy, returns a list of IR Codes converted from hex to ints.  See 
         http://dangerousprototypes.com/docs/USB_IR_Toy:_Sampling_mode for more information on the
-        sample format'''
+        sample format.  Reading starts when an IR signal is received and stops after 1.7 seconds of 
+        inactivity'''
 
         self._sleep()
 
@@ -116,7 +119,7 @@ class IrToy(object):
         return irCode
 
     def reset(self):
-        '''Reset the IR Toy to sampling mode with nothing in the buffer'''
+        '''Reset the IR Toy to sampling mode and clear the Toy's 62 byte buffer'''
 
         self._sleep()
         self._writeList([0x00]*5)
@@ -140,18 +143,3 @@ class IrToy(object):
         self._setTransmit()
         self._writeList(code, check_handshake=True)
         self._getTransmitReport()
-
-    def close(self):
-        '''reset and close the serial connection'''
-
-        self.reset()
-
-        # sleeps are important, otherwise we risk losing the serial interface from Linux
-        self._sleep()
-        self.closed = True
-
-    def __del__(self):
-
-        if not self.closed:
-            self._sleep()
-            self.close()
