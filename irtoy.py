@@ -116,6 +116,8 @@ class IrToy(object):
 
             readCount += 1
 
+        self._sleep()
+
         return irCode
 
     def reset(self):
@@ -142,4 +144,9 @@ class IrToy(object):
         self._sleep()
         self._setTransmit()
         self._writeList(code, check_handshake=True)
+        self._sleep()
         self._getTransmitReport()
+        
+        # experimentation shows that a reset is needed to avoid dropping the serial connection on Linux
+        self.reset()
+        self._sleep()

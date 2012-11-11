@@ -76,10 +76,11 @@ class TestIrToy(unittest.TestCase):
         
         # when transmitting, we expect a reset (five 0x00), 'S' to enter sampling mode, 0x26 for enable handshake,
         # 0x25 to enable notify on transmit, 0x24 to enable transmit byte count, and 0x03 to start the transmission,
-        # then the list of codes to transmit (always ending with 0xff, 0xff).  See DP link at top of this file for more info.
+        # then the list of codes to transmit (always ending with 0xff, 0xff), and another reset.  See DP link at top of this file for more info.
         expectedHistory = [[0x00, 0x00, 0x00, 0x00, 0x00],
                             b'S', [0x26], [0x25], [0x24], [0x03],
-                            [10, 10, 0xff, 0xff]]
+                            [10, 10, 0xff, 0xff],
+                            [0x00, 0x00, 0x00, 0x00, 0x00]]
 
         self.assertEqual(self.serialMock.writeHistory, expectedHistory)
 
