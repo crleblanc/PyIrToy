@@ -21,7 +21,7 @@ import time
 import binascii
 
 __author__ = 'Chris LeBlanc'
-__version__ = '0.2.2'
+__version__ = '0.2.3'
 __email__ = 'crleblanc@gmail.com'
 
 class IrToy(object):
