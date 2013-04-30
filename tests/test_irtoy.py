@@ -70,7 +70,7 @@ class TestIrToy(unittest.TestCase):
         
         # set the expected results from read(): protocol version, handshake ('>' converts to 62),
         # byte count transmitted, and completion code.  Not using these, so just putting junk in.
-        self.serialMock.setReadCode([bytearray([62]), bytearray([62]), bytearray([0,0,0,1]), b'C'])
+        self.serialMock.setReadCode([bytearray([62]), bytearray([62]), bytearray([0,0,0,1]), b'C', b'S01'])
         
         self.toy.transmit([10,10])
         
@@ -80,7 +80,8 @@ class TestIrToy(unittest.TestCase):
         expectedHistory = [[0x00, 0x00, 0x00, 0x00, 0x00],
                             b'S', [0x26], [0x25], [0x24], [0x03],
                             [10, 10, 0xff, 0xff],
-                            [0x00, 0x00, 0x00, 0x00, 0x00]]
+                            [0x00, 0x00, 0x00, 0x00, 0x00],
+                            b'S']
 
         self.assertEqual(self.serialMock.writeHistory, expectedHistory)
 
@@ -92,7 +93,33 @@ class TestIrToy(unittest.TestCase):
         readSignal = self.toy.receive()
 
         self.assertEqual(readSignal, [1, 2, 0xff, 0xff])
+
+    def XtestMultipleTransmits(self):
+        # tracking down a bug that shows itself when we transmit using the same object for more than one transmit.  Method
+        # name starts with X to avoid running with other tests, this one is run manually since you need the IR Toy hardware
+        # and the pySerial module which isn't necessarily installed by default.
+
+        # IR code that causes an issue, any code would probably work for this purpose.
+        irCode=[1, 159, 0, 212, 0, 26, 0, 25, 0, 26, 0, 78, 0, 26, 0, 25, 0, 26, 0, 25, 0, 26, 0, 78, 0, 26, 0, 
+                25, 0, 27, 0, 77, 0, 26, 0, 77, 0, 26, 0, 78, 0, 26, 0, 26, 0, 26, 0, 78, 0, 26, 0, 78, 0, 26,
+                0, 25, 0, 26, 0, 78, 0, 26, 0, 78, 0, 26, 0, 24, 0, 28, 0, 76, 0, 27, 0, 25, 0, 27, 0, 77, 0, 27, 
+                0, 25, 0, 27, 0, 24, 0, 27, 0, 24, 0, 28, 0, 24, 0, 28, 0, 24, 0, 28, 0, 24, 0, 27, 0, 76, 0, 28, 
+                0, 24, 0, 27, 0, 77, 0, 27, 0, 76, 0, 27, 0, 76, 0, 28, 0, 76, 0, 27, 0, 76, 0, 28, 7, 15, 1, 160, 
+                0, 107, 0, 27, 255, 255] #Onkyo TX-SR508 mute
         
+        import serial
+        serialDevice = serial.Serial('/dev/ttyACM0')
+        #serialDevice = self.serialMock
+
+        # re-using a single object with multiple transmits
+        toy = IrToy(serialDevice)
+        for i in range(5):
+            toy.transmit(irCode)
+            
+        # using a new object for each transmit
+        for i in range(5):
+            toy2 = IrToy(serialDevice)
+            toy2.transmit(irCode)
 
 if __name__ == '__main__':
     unittest.main()

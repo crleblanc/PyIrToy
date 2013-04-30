@@ -21,7 +21,7 @@ import time
 import binascii
 
 __author__ = 'Chris LeBlanc'
-__version__ = '0.2.1'
+__version__ = '0.2.2'
 __email__ = 'crleblanc@gmail.com'
 
 class IrToy(object):
@@ -81,12 +81,12 @@ class IrToy(object):
         self.complete = self.toy.read(1)
 
     def _setTransmit(self):
+        
         self._sleep()
         self._writeList([0x26]) #Enable transmit handshake
         self._writeList([0x25]) #Enable transmit notify on complete
         self._writeList([0x24]) #Enable transmit byte count report
         self._writeList([0x03], check_handshake=True) #Expect to receive packets to transmit
-
         self.transmitMode = True
 
     def receive(self):
@@ -125,6 +125,7 @@ class IrToy(object):
 
         self._sleep()
         self._writeList([0x00]*5)
+        self.transmitMode = False
 
     def transmit(self, code):
         '''switch to transmit mode and write the list (or list-like) set of ints to the toy for transmission,
@@ -147,6 +148,6 @@ class IrToy(object):
         self._sleep()
         self._getTransmitReport()
         
-        # experimentation shows that a reset is needed to avoid dropping the serial connection on Linux
-        self.reset()
+        # experimentation shows that returning to sampling mode is needed to avoid dropping the serial connection on Linux
+        self._setSamplingMode()
         self._sleep()
