@@ -178,5 +178,5 @@ class IrToy(object):
         self._setSamplingMode()
         self._sleep()
 
-        if self.complete.lower() != 'c':
+        if self.complete not in [b'c', b'C']:
             raise IRTransmitError("Failed to transmit IR code, report=%s" % self.complete)
