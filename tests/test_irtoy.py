@@ -46,7 +46,8 @@ class SerialMock(object):
             response = self.readCode[self.readCount]
             self.readCount += 1
         else:
-            response = b'S01'
+            #response = b'S01'
+            response = b'V222'
         
         return response
         
@@ -69,7 +70,7 @@ class TestIrToy(unittest.TestCase):
         self.assertRaises(ValueError, self.toy.transmit, [10])
         
         # set the expected results from read(): protocol version, handshake ('>' converts to 62),
-        # byte count transmitted, and completion code.  Not using these, so just putting junk in.
+        # byte count transmitted, and completion code.
         self.serialMock.setReadCode([bytearray([62]), bytearray([62]), bytearray([0,0,0,1]), b'C', b'S01'])
         
         self.toy.transmit([10,10])
@@ -78,10 +79,14 @@ class TestIrToy(unittest.TestCase):
         # 0x25 to enable notify on transmit, 0x24 to enable transmit byte count, and 0x03 to start the transmission,
         # then the list of codes to transmit (always ending with 0xff, 0xff), and another reset.  See DP link at top of this file for more info.
         expectedHistory = [[0x00, 0x00, 0x00, 0x00, 0x00],
-                            b'S', [0x26], [0x25], [0x24], [0x03],
-                            [10, 10, 0xff, 0xff],
-                            [0x00, 0x00, 0x00, 0x00, 0x00],
-                            b'S']
+                           'v',
+                           [0x00, 0x00, 0x00, 0x00, 0x00],
+                           'v',
+                           [0x00, 0x00, 0x00, 0x00, 0x00],
+                           b'S', [0x26], [0x25], [0x24], [0x03],
+                           [10, 10, 0xff, 0xff],
+                           [0x00, 0x00, 0x00, 0x00, 0x00],
+                           b'S']
 
         self.assertEqual(self.serialMock.writeHistory, expectedHistory)
 

@@ -43,9 +43,10 @@ class IrToy(object):
         self.complete = None
 
         self.requiredVersion = 22
+        hardware, revision = self.firmware_revision()
         if self.firmware_revision()[1] < self.requiredVersion:
-            raise FirmwareVersionError("pyirtoy will only work with firmware version %d or greater"
-                                        % self.requiredVersion)
+            raise FirmwareVersionError("pyirtoy will only work with firmware version %d or greater, current=%d"
+                                        % (self.requiredVersion, revision))
         
         # always use sampling mode
         self._setSamplingMode()
