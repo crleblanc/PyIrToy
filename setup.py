@@ -1,7 +1,7 @@
 from distutils.core import setup
 
 setup(name='pyirtoy',
-      version='0.2.4',
+      version='0.2.5',
       py_modules=['irtoy'],
       description='Python module for transmitting and receiving infrared signals from an IR Toy (firmware rev. 22 or higher)',
       license='Creative Commons Attribution ShareAlike license v3.0',
