@@ -21,8 +21,15 @@ import time
 import binascii
 
 __author__ = 'Chris LeBlanc'
-__version__ = '0.2.3'
+__version__ = '0.2.4'
 __email__ = 'crleblanc@gmail.com'
+
+class FirmwareVersionError(Exception):
+    pass
+
+class IRTransmitError(Exception):
+    pass
+
 
 class IrToy(object):
 
@@ -35,10 +42,28 @@ class IrToy(object):
         self.byteCount = None
         self.complete = None
 
+        self.requiredVersion = 22
+        if self.firmware_revision()[1] < self.requiredVersion:
+            raise FirmwareVersionError("pyirtoy will only work with firmware version %d or greater"
+                                        % self.requiredVersion)
+        
         # always use sampling mode
         self._setSamplingMode()
 
         self.transmitMode = False
+
+
+    def firmware_revision(self):
+        '''Return the hardware and firmware revision returned as a tuple'''
+        self.reset()
+        self.toy.write(b'v')
+        self._sleep()
+        
+        versionString = self.toy.read(4)
+        hardwareVersion = int(versionString[1:2])
+        firmwareVersion = int(versionString[2:4])
+
+        return hardwareVersion, firmwareVersion
 
     def _sleep(self):
         time.sleep(self.sleepTime)
@@ -71,7 +96,7 @@ class IrToy(object):
                 self.handshake = ord(self.toy.read(1))
 
         if bytesWritten != len(code):
-            raise IOError('incorrect number of bytes written to serial device, expected %d' % len(code))
+            raise IOError("incorrect number of bytes written to serial device, expected %d" % len(code))
 
     def _getTransmitReport(self):
         '''get the byteCount and completion status from the IR Toy'''
@@ -147,7 +172,10 @@ class IrToy(object):
         self._writeList(code, check_handshake=True)
         self._sleep()
         self._getTransmitReport()
-        
+
         # experimentation shows that returning to sampling mode is needed to avoid dropping the serial connection on Linux
         self._setSamplingMode()
         self._sleep()
+
+        if self.complete.lower() != 'c':
+            raise IRTransmitError("Failed to transmit IR code, report=%s" % self.complete)
