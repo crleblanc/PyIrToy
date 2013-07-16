@@ -21,7 +21,7 @@ import time
 import binascii
 
 __author__ = 'Chris LeBlanc'
-__version__ = '0.2.5'
+__version__ = '0.2.6'
 __email__ = 'crleblanc@gmail.com'
 
 class FirmwareVersionError(Exception):
@@ -78,6 +78,8 @@ class IrToy(object):
         self._sleep()
 
         self.protocolVersion = self.toy.read(3)
+
+        self._sleep()
 
     def _writeList(self, code, check_handshake=False):
         '''write a list like object of integer values'''
@@ -152,6 +154,7 @@ class IrToy(object):
         self._sleep()
         self._writeList([0x00]*5)
         self.transmitMode = False
+        self._sleep()
 
     def transmit(self, code):
         '''switch to transmit mode and write the list (or list-like) set of ints to the toy for transmission,
@@ -168,15 +171,22 @@ class IrToy(object):
         if code[-2:] != [0xff, 0xff]:
             code.extend([0xff, 0xff])
 
-        self._sleep()
-        self._setTransmit()
-        self._writeList(code, check_handshake=True)
-        self._sleep()
-        self._getTransmitReport()
+        try:
+            self._sleep()
+            self._setTransmit()
+            self._writeList(code, check_handshake=True)
+            self._sleep()
+            self._getTransmitReport()
+
+            if self.complete not in [b'c', b'C']:
+                raise IRTransmitError("Failed to transmit IR code, report=%s" % self.complete)
+        except:
+            # if anything went wrong then sheepishly try to reset state and raise the exception,
+            # surprisingly common on a weak CPU like the raspberry pi
+            #self.toy.flushOutput() # hmm, maybe this will help? Interesting: we get a crazy state until a new program is started, then fine.
+            self.reset()
+            self._setSamplingMode()
+            raise
 
         # experimentation shows that returning to sampling mode is needed to avoid dropping the serial connection on Linux
         self._setSamplingMode()
-        self._sleep()
-
-        if self.complete not in [b'c', b'C']:
-            raise IRTransmitError("Failed to transmit IR code, report=%s" % self.complete)
