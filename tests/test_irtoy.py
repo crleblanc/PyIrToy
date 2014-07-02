@@ -6,10 +6,6 @@
 # Chris LeBlanc 2012
 
 import unittest
-import os
-import sys
-# not sure how to get around this ugly hack:
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)))
 from irtoy import IrToy
 
 class SerialMock(object):
@@ -79,9 +75,9 @@ class TestIrToy(unittest.TestCase):
         # 0x25 to enable notify on transmit, 0x24 to enable transmit byte count, and 0x03 to start the transmission,
         # then the list of codes to transmit (always ending with 0xff, 0xff), and another reset.  See DP link at top of this file for more info.
         expectedHistory = [[0x00, 0x00, 0x00, 0x00, 0x00],
-                           'v',
+                           b'v',
                            [0x00, 0x00, 0x00, 0x00, 0x00],
-                           'v',
+                           b'v',
                            [0x00, 0x00, 0x00, 0x00, 0x00],
                            b'S', [0x26], [0x25], [0x24], [0x03],
                            [10, 10, 0xff, 0xff],

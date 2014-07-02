@@ -1,4 +1,7 @@
-from distutils.core import setup
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 import irtoy
 
 setup(name='pyirtoy',
@@ -11,5 +14,6 @@ setup(name='pyirtoy',
       url='https://github.com/crleblanc/PyIrToy',
       classifiers=['Intended Audience :: Developers',
                    'Operating System :: OS Independent',
-                   'Topic :: Software Development']
+                   'Topic :: Software Development'],
+      test_suite='tests'
       )
