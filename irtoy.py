@@ -21,7 +21,7 @@ import time
 import binascii
 
 __author__ = 'Chris LeBlanc'
-__version__ = '0.2.6'
+__version__ = '0.3.0'
 __email__ = 'crleblanc@gmail.com'
 
 class FirmwareVersionError(Exception):
