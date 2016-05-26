@@ -24,8 +24,10 @@ __author__ = 'Chris LeBlanc'
 __version__ = '0.2.6'
 __email__ = 'crleblanc@gmail.com'
 
+
 class FirmwareVersionError(Exception):
     pass
+
 
 class IRTransmitError(Exception):
     pass
@@ -43,7 +45,7 @@ class IrToy(object):
         self.complete = None
 
         self.requiredVersion = 22
-        hardware, revision = self.firmware_revision()
+        print 'getting rev'
         if self.firmware_revision()[1] < self.requiredVersion:
             raise FirmwareVersionError("pyirtoy will only work with firmware version %d or greater, current=%d"
                                         % (self.requiredVersion, revision))
@@ -87,12 +89,13 @@ class IrToy(object):
         self._sleep()
 
         byteCode = bytearray(code)
+        segmentWritten = 0
         bytesWritten = 0
 
-        # 31 * 2 bytes = max of 62 bytes in the buffer.  31 hangs so using 32, strange.
-        maxWriteSize = 32
-        for idx in range(0, len(code), maxWriteSize):
-            segmentWritten = self.toy.write(byteCode[idx:idx+maxWriteSize])
+        # 31 * 2 bytes = max of 62 bytes in the buffer.  Slices are non-inclusive.
+        maxWriteSize = 31
+        for idx in range(0, len(code), maxWriteSize+1):
+            segmentWritten = self.toy.write(byteCode[idx:idx+maxWriteSize+1])
             bytesWritten += segmentWritten
 
             if check_handshake:
