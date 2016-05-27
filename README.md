@@ -31,6 +31,7 @@ Examples
 This uses the IR code mentioned here http://dangerousprototypes.com/docs/USB_IR_Toy:_Sampling_mode.
 
 ```python
+#!/usr/bin/env python
 import serial
 import irtoy
 
@@ -55,6 +56,8 @@ this code on the IR Toy.
 
 
 ```python
+#!/usr/bin/env python
+from __future__ import print_function
 import serial
 import irtoy
 
@@ -65,7 +68,10 @@ with serial.Serial('/dev/ttyACM0') as serial_device:
 
     # receive an IR signal from the IR Toy, stored in a list.
     # Note: this call will block (hang) until an IR code has been received.
+    print('waiting to record an IR signal')
     ir_code = toy.receive()
+
+    print('received IR signal:', ir_code)
 
     # transmit the recorded signal back to the IR Toy
     toy.transmit(ir_code)
