@@ -39,20 +39,20 @@ class IrToy(object):
         '''Create a new IrToy instance using the serial device for the USB IR Toy'''
         self.toy = serialDevice
 
-        self.sleepTime = 0.05
+        self.sleep_time = 0.05
         self.handshake = None
-        self.byteCount = None
+        self.byte_count = None
         self.complete = None
 
-        self.requiredVersion = 22
-        if self.firmware_revision()[1] < self.requiredVersion:
+        self.required_version = 22
+        if self.firmware_revision()[1] < self.required_version:
             raise FirmwareVersionError("pyirtoy will only work with firmware version %d or greater, current=%d"
-                                        % (self.requiredVersion, revision))
+                                        % (self.required_version, revision))
         
         # always use sampling mode
-        self._setSamplingMode()
+        self._set_sampling_mode()
 
-        self.transmitMode = False
+        self.transmit_mode = False
 
 
     def firmware_revision(self):
@@ -61,16 +61,16 @@ class IrToy(object):
         self.toy.write(b'v')
         self._sleep()
         
-        versionString = self.toy.read(4)
-        hardwareVersion = int(versionString[1:2])
-        firmwareVersion = int(versionString[2:4])
+        version_string = self.toy.read(4)
+        hardware_version = int(version_string[1:2])
+        firmware_version = int(version_string[2:4])
 
-        return hardwareVersion, firmwareVersion
+        return hardware_version, firmware_version
 
     def _sleep(self):
-        time.sleep(self.sleepTime)
+        time.sleep(self.sleep_time)
 
-    def _setSamplingMode(self):
+    def _set_sampling_mode(self):
         '''set the IR Toy to use sampling mode, which we use exclusively'''
         self.reset()
         self.toy.write(b'S')
@@ -79,42 +79,42 @@ class IrToy(object):
         self.protocolVersion = self.toy.read(3)
         self._sleep()
 
-    def _writeList(self, code, check_handshake=False):
+    def _write_list(self, code, check_handshake=False):
         '''write a list like object of integer values'''
 
         self._sleep()
 
-        byteCode = bytearray(code)
-        segmentWritten = 0
-        bytesWritten = 0
+        byte_code = bytearray(code)
+        segment_written = 0
+        bytes_written = 0
 
         # 31 * 2 bytes = max of 62 bytes in the buffer.  Slices are non-inclusive.
-        maxWriteSize = 31
-        for idx in range(0, len(code), maxWriteSize+1):
-            segmentWritten = self.toy.write(byteCode[idx:idx+maxWriteSize+1])
-            bytesWritten += segmentWritten
+        max_write_size = 31
+        for idx in range(0, len(code), max_write_size+1):
+            segment_written = self.toy.write(byte_code[idx:idx+max_write_size+1])
+            bytes_written += segment_written
 
             if check_handshake:
                 self.handshake = ord(self.toy.read(1))
 
-        if bytesWritten != len(code):
+        if bytes_written != len(code):
             raise IOError("incorrect number of bytes written to serial device, expected %d" % len(code))
 
-    def _getTransmitReport(self):
-        '''get the byteCount and completion status from the IR Toy'''
+    def _get_transmit_report(self):
+        '''get the byte_count and completion status from the IR Toy'''
 
-        hexBytes = binascii.b2a_hex(self.toy.read(3)[1:])
-        self.byteCount = int(hexBytes, 16)
+        hex_bytes = binascii.b2a_hex(self.toy.read(3)[1:])
+        self.byte_count = int(hex_bytes, 16)
         self.complete = self.toy.read(1)
 
-    def _setTransmit(self):
+    def _set_transmit(self):
         
         self._sleep()
-        self._writeList([0x26]) #Enable transmit handshake
-        self._writeList([0x25]) #Enable transmit notify on complete
-        self._writeList([0x24]) #Enable transmit byte count report
-        self._writeList([0x03], check_handshake=True) #Expect to receive packets to transmit
-        self.transmitMode = True
+        self._write_list([0x26]) #Enable transmit handshake
+        self._write_list([0x25]) #Enable transmit notify on complete
+        self._write_list([0x24]) #Enable transmit byte count report
+        self._write_list([0x03], check_handshake=True) #Expect to receive packets to transmit
+        self.transmit_mode = True
 
     def receive(self):
         '''Read a signal from the toy, returns a list of IR Codes converted from hex to ints.  See 
@@ -125,34 +125,34 @@ class IrToy(object):
         self._sleep()
 
         # reset and put back in receive mode in case it was in transmit mode or there was junk in the buffer
-        self._setSamplingMode()
+        self._set_sampling_mode()
 
-        bytesToRead=1
-        readCount=0
-        irCode = []
+        bytes_to_read=1
+        read_count=0
+        ir_code = []
 
         while(True):
-            readVal = self.toy.read(bytesToRead)
-            hexVal = binascii.b2a_hex(readVal)
-            intVal = int(hexVal, 16)
+            read_val = self.toy.read(bytes_to_read)
+            hex_val = binascii.b2a_hex(read_val)
+            int_val = int(hex_val, 16)
 
-            irCode.append(intVal)
+            ir_code.append(int_val)
 
-            if readCount >= 2 and intVal == 255 and irCode[-2] == 255:
+            if read_count >= 2 and int_val == 255 and ir_code[-2] == 255:
                 break
 
-            readCount += 1
+            read_count += 1
 
         self._sleep()
 
-        return irCode
+        return ir_code
 
     def reset(self):
         '''Reset the IR Toy to sampling mode and clear the Toy's 62 byte buffer'''
 
         self._sleep()
-        self._writeList([0x00]*5)
-        self.transmitMode = False
+        self._write_list([0x00]*5)
+        self.transmit_mode = False
         self._sleep()
 
     def transmit(self, code):
@@ -172,10 +172,10 @@ class IrToy(object):
 
         try:
             self._sleep()
-            self._setTransmit()
-            self._writeList(code, check_handshake=True)
+            self._set_transmit()
+            self._write_list(code, check_handshake=True)
             self._sleep()
-            self._getTransmitReport()
+            self._get_transmit_report()
 
             if self.complete not in [b'c', b'C']:
                 raise IRTransmitError("Failed to transmit IR code, report=%s" % self.complete)
@@ -184,8 +184,8 @@ class IrToy(object):
             # surprisingly common on a weak CPU like the raspberry pi
             #self.toy.flushOutput() # hmm, maybe this will help? Interesting: we get a crazy state until a new program is started, then fine.
             self.reset()
-            self._setSamplingMode()
+            self._set_sampling_mode()
             raise
 
         # experimentation shows that returning to sampling mode is needed to avoid dropping the serial connection on Linux
-        self._setSamplingMode()
+        self._set_sampling_mode()
