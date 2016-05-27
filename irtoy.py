@@ -21,7 +21,7 @@ import time
 import binascii
 
 __author__ = 'Chris LeBlanc'
-__version__ = '0.2.6'
+__version__ = '0.2.7'
 __email__ = 'crleblanc@gmail.com'
 
 
@@ -45,7 +45,6 @@ class IrToy(object):
         self.complete = None
 
         self.requiredVersion = 22
-        print 'getting rev'
         if self.firmware_revision()[1] < self.requiredVersion:
             raise FirmwareVersionError("pyirtoy will only work with firmware version %d or greater, current=%d"
                                         % (self.requiredVersion, revision))
@@ -74,13 +73,10 @@ class IrToy(object):
     def _setSamplingMode(self):
         '''set the IR Toy to use sampling mode, which we use exclusively'''
         self.reset()
-
         self.toy.write(b'S')
-
+        
         self._sleep()
-
         self.protocolVersion = self.toy.read(3)
-
         self._sleep()
 
     def _writeList(self, code, check_handshake=False):
