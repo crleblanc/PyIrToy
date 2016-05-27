@@ -19,6 +19,7 @@
 
 import time
 import binascii
+import gc
 
 __author__ = 'Chris LeBlanc'
 __version__ = '0.2.7'
@@ -88,14 +89,18 @@ class IrToy(object):
         segment_written = 0
         bytes_written = 0
 
-        # 31 * 2 bytes = max of 62 bytes in the buffer.  Slices are non-inclusive.
-        max_write_size = 31
-        for idx in range(0, len(code), max_write_size+1):
-            segment_written = self.toy.write(byte_code[idx:idx+max_write_size+1])
-            bytes_written += segment_written
+        try:
+            # 31 * 2 bytes = max of 62 bytes in the buffer.  Slices are non-inclusive.
+            gc.disable()
+            max_write_size = 31
+            for idx in range(0, len(code), max_write_size+1):
+                segment_written = self.toy.write(byte_code[idx:idx+max_write_size+1])
+                bytes_written += segment_written
 
-            if check_handshake:
-                self.handshake = ord(self.toy.read(1))
+                if check_handshake:
+                    self.handshake = ord(self.toy.read(1))
+        finally:
+            gc.enable()
 
         if bytes_written != len(code):
             raise IOError("incorrect number of bytes written to serial device, expected %d" % len(code))
