@@ -1,6 +1,6 @@
 Important Note
 ==============
-This project relies on the IR Toy for transmitting and receiving IR signals. Unfortunately this hardware seems to suffer from a firmware bug described here https://github.com/crleblanc/PyIrToy/issues/2, which seems especially bad on the Raspberry Pi. I haven't been able to find a workaround for this stability problem, so cannot recommend using this project for long running tasks.
+This project relies on the IR Toy for transmitting and receiving IR signals. Unfortunately this hardware seems to suffer from a firmware bug described here https://github.com/crleblanc/PyIrToy/issues/2, which seems especially bad on the Raspberry Pi. I haven't been able to find a workaround for this stability problem, so cannot recommend using the IR Toy. Unfortunately development on the IR Toy project appears to have stopped.
 
 PyIrToy
 =======
@@ -19,4 +19,4 @@ be installed with the command "pip install pyirtoy" (this may require the sudo
 command, if installing for all users).
 
 This module makes it easy to transmit to and receive from an IR Toy.  The wiki
-has some quick examples.
+has some quick [examples](https://github.com/crleblanc/PyIrToy/wiki).
