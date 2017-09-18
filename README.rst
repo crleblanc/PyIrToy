@@ -19,4 +19,4 @@ be installed with the command "pip install pyirtoy" (this may require the sudo
 command, if installing for all users).
 
 This module makes it easy to transmit to and receive from an IR Toy.  The wiki
-has some quick [examples](https://github.com/crleblanc/PyIrToy/wiki).
+has some quick examples (https://github.com/crleblanc/PyIrToy/wiki).
